@@ -18,7 +18,7 @@ start_t = time.time()                                    # время старт
 finish_t = time.time() + n*86400                         # Время окончания, дни n превращаем в секунды
 with open('config.ini', 'r') as f:
     ip_adres = f.read()
-    ip_adres = ip_adres.split(',')
+    ip_adres = ip_adres.split('\n')
     ip_kontrol = ip_adres
 while time.time() <= finish_t:                            # проверяем савпадения времяни с временем окончания
     for i in range(len(ip_adres)):
