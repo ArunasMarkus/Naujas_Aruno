@@ -11,7 +11,7 @@ start_t = time.time()                                    # время старт
 finish_t = time.time() + n*86400                         # Время окончания, дни n превращаем в секунды
 with open('config.ini', 'r') as f:
     ip_adres = f.read()
-    ip_adres = ip_adres.split(',')
+    ip_adres = ip_adres.split('\n')
 while time.time() <= finish_t:                            # проверяем савпадения времяни с временем окончания
     for i in range(len(ip_adres)):
         if not os.system("ping -n 1 " + ip_adres[i]) == 0:  # делаем пинг, если нет ответ, то пишем в ping_log.ini
@@ -29,5 +29,5 @@ while time.time() <= finish_t:                            # проверяем �
     wr_ip_adres = [i for i in wr_ip_adres if i not in ok_wr]
     ok_wr = []
 print('Отчет можно посмотреть в файле ping_log.ini')
-print('IP которые, на момент завершения, отзывались', ip_adres)
+print(type(ip_adres), 'IP которые, на момент завершения, отзывались', ip_adres)
 print('IP которые, на момент завершения, НЕ отзывались', wr_ip_adres)
