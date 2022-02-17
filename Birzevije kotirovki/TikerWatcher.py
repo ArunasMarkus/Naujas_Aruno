@@ -1,25 +1,61 @@
-tiker_=list()
-dict_tiker=dict()
-index=list()
-reiksmes=''
-minimum=int()
-maksimum=int()
-with open('config.ini', 'r') as f:
-    tiker = f.read()
-    tiker = tiker.split('}\n{')
+# -*- coding: utf-8 -*-
+import smtplib
+from email.mime.text import MIMEText
+import time
+import yfinance as yf
+""" Programa beriot iz config.ini informaciju pro tikeri (nazvanije i diapozon dopustimich znacenij)
+, razberaet infu do nuznovo sostojanija i proveriaet cerez YFinance na birze sootvetstvije atributa
+RegularMarketPrice k zadonomu cenovomu diapazonu v config.ini. Jesli jest nesootvetstvije v tecenii 15min
+, visilaet pismo po zadannomu adresu s opovescejijem, cto tiker visiol iz diapozona. Vsia programa 
+razmescena v zadavaemij dniami vremenoj cikl nabliudejija. 
+"""
+tiker_ = list()  # –∫–æ–º–µ–Ω—Ç–∞—Ä–∏–π –Ω–∞ –∫–∏—Ä–∏–ª–µ—Ü–µ
+dict_tiker = dict()
+index = list()
+outofrange = list()
+n = float(input('C–∫–æ–ª—å–∫–æ –¥–Ω–µ–π —Ö–æ—Ç–∏—Ç–µ –º–æ–Ω–∏—Ç–æ—Ä–∏—Ç—å:'))
+start_t = time.time()  # –≤—Ä–µ–º—è —Å—Ç–∞—Ä—Ç–∞
+finish_t = time.time() + n * 86400  # –í—Ä–µ–º—è –æ–∫–æ–Ω—á–∞–Ω–∏—è, –¥–Ω–∏ n –ø—Ä–µ–≤—Ä–∞—â–∞–µ–º –≤ —Å–µ–∫—É–Ω–¥—ã 1min=0.002
+while time.time() <= finish_t:  # zapuskaem cikl intervala vremeni nabiudenij
+    with open('config.ini', 'r') as f:  # citaem dannije iz faila config.ini
+        tiker = f.read()
+        tiker = tiker.split('}\n{')  # obrabotka scitanich danix-svod v nuznij format
     for i in range(len(tiker)):
-        if i==0 :
-            tiker[i] = tiker[i][1:]
-        elif i == len(tiker)-1:
-            tiker[i] = tiker[i][:len(tiker[i])-1]
-        tiker_ += tiker[i].split(':')
-    for i in range(0,len(tiker_),2):
-        dict_tiker[tiker_[i]] = tiker_[i+1]
-    index=list(dict_tiker)                                  # ËÏÂËÏ ÒÔËÒÓÍ ËÌ‰ÂÍÒÓ‚
-                                                            # Ì‡‰Ó ÔÓÎÛ˜ËÚ¸ ÍÓÚËÓ‚ÍË ÔÓ ˝ÚËÏ ËÌ‰ÂÍÒ‡Ï
-                                                            # Ë Ëı Ò‡‚ÌËÚ¸ Ò ÏËÌ Ë Ï‡ı
-
-    reiksmes=dict_tiker[index[0]][1:-1]                     # ÔÓÎÛ˜‡ÂÏ ÁÌ‡˜ÂÌËˇ ÏËÌ Ë Ï‡ı ‰Îˇ ÍÓÌÍÚ.ËÌ‰ÂÍÒ‡
-    reiksmes=reiksmes.split(",")                            # ˝ÚÓ Ì‡‰Ó Á‡ˆËÍÎËÚ¸
-    minimum, maksimum =int(reiksmes[0]), int(reiksmes[1])
-    print(minimum<maksimum)
+        if i == 0:  # s 1 saga k sledujuscenu
+            tiker[i] = tiker[i][1:]  # skinul s peredi {
+        elif i == len(tiker) - 1:  # idem dalshe
+            tiker[i] = tiker[i][:len(tiker[i]) - 1]  # skinuli s konca }
+        tiker_ += tiker[i].split(':')  # imejem spisok tikerov (index-kliuc i znacenije)
+    for i in range(0, len(tiker_), 2):
+        dict_tiker[tiker_[i]] = tiker_[i + 1]  # polucili slovar kliuc-index i min/max znacenija
+        index = list(dict_tiker)  # imeem spisok indeksov-kliuceij? mozet on i ne nuzen?
+    for i in range(len(index)):  # razbiv znacenij min i max na cifru
+        reiksmes = dict_tiker[index[i]][1:-1]
+        reiksmes = reiksmes.split(",")
+        minimum, maksimum = float(reiksmes[0]), float(
+            reiksmes[1])  # nado polucit kotirovki po etim indeksam
+        tickeris = yf.Ticker(index[i])  # delaem zapros v birzu pro tiker iz spiska
+        x = tickeris.info['regularMarketPrice']  # X prisvaevaem znacenija tekusciai ceni tikera s birzi
+        print(x, type(x), (minimum < x < maksimum))  # INFO TESTA dlai ocevidnosti
+        if not (minimum < x < maksimum):  # proverka sootvetstvija ceni tikera s zadanimi znacenijami
+            if index[i] in outofrange:  # proveriu nalicije Tikera v spiske tikerov OUTOFRANGE
+                smtpObj = smtplib.SMTP_SSL('smtp.mail.ru', 465)
+                smtpObj.login('markus0013@mail.ru', 'QzK7xDaSdMAqXNL7BJtb')
+                smtpObj.sendmail("markus0013@mail.ru", "markus0013@mail.ru",
+                                 f'Tiker {index[i]} vne diapazona, znacenije = {x}')
+                smtpObj.quit()
+                # sender = 'markus0013@mail.ru'
+                # receivers = ['markus0013@mail.ru']
+                # port = 465
+                # msg = MIMEText(f'Tiker {index[i]} –≤–Ω–µ –¥–∏–∞–ø–∞–∑–æ–Ω–∞ [{minimum} –∏ {maksimum}], –∑–Ω–∞—á–µ–Ω–∏–µ = {x}')
+                # msg['Subject'] = '–¢–∏–∫–µ—Ä –∏–∑–º–µ–Ω–∏–ª—Å—è!!'
+                # msg['From'] = 'markus0013@mail.ru'
+                # msg['To'] = 'markus0013@mail.ru'
+                # with smtplib.SMTP_SSL('smtp.mail.ru', port) as server:
+                #     server.login('markus0013@mail.ru', 'QzK7xDaSdMAqXNL7BJtb')
+                #     server.sendmail(sender, receivers, msg.as_string())
+                #     print("–ü–∏—Å—å–º–æ –æ—Ç–ø—Ä–∞–≤–ª–µ–Ω–æ")
+            else:
+                outofrange += [index[i]]  # jesli ne nasiol tam tikera, to dabavliu
+    print(f'Vremia pereriva {time.ctime()}', 'OUTOFRANGE', outofrange, type(outofrange))
+    time.sleep(30)  # po scenariju mozno prervatsia na 15 min(15*60=900)
