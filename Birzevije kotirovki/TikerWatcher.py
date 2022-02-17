@@ -40,7 +40,7 @@ while time.time() <= finish_t:  # zapuskaem cikl intervala vremeni nabiudenij
         if not (minimum < x < maksimum):  # proverka sootvetstvija ceni tikera s zadanimi znacenijami
             if index[i] in outofrange:  # proveriu nalicije Tikera v spiske tikerov OUTOFRANGE
                 smtpObj = smtplib.SMTP_SSL('smtp.mail.ru', 465)
-                smtpObj.login('markus0013@mail.ru', 'QzK7xDaSdMAqXNL7BJtb')
+                smtpObj.login('markus0013@mail.ru', 'zK7xDaSdMAqXNL7BJtb')
                 smtpObj.sendmail("markus0013@mail.ru", "markus0013@mail.ru",
                                  f'Tiker {index[i]} vne diapazona, znacenije = {x}')
                 smtpObj.quit()
