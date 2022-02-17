@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import smtplib
-from email.mime.text import MIMEText
+
 import time
 import yfinance as yf
 """ Programa beriot iz config.ini informaciju pro tikeri (nazvanije i diapozon dopustimich znacenij)
@@ -44,17 +44,7 @@ while time.time() <= finish_t:  # zapuskaem cikl intervala vremeni nabiudenij
                 smtpObj.sendmail("markus0013@mail.ru", "markus0013@mail.ru",
                                  f'Tiker {index[i]} vne diapazona, znacenije = {x}')
                 smtpObj.quit()
-                # sender = 'markus0013@mail.ru'
-                # receivers = ['markus0013@mail.ru']
-                # port = 465
-                # msg = MIMEText(f'Tiker {index[i]} вне диапазона [{minimum} и {maksimum}], значение = {x}')
-                # msg['Subject'] = 'Тикер изменился!!'
-                # msg['From'] = 'markus0013@mail.ru'
-                # msg['To'] = 'markus0013@mail.ru'
-                # with smtplib.SMTP_SSL('smtp.mail.ru', port) as server:
-                #     server.login('markus0013@mail.ru', 'QzK7xDaSdMAqXNL7BJtb')
-                #     server.sendmail(sender, receivers, msg.as_string())
-                #     print("Письмо отправлено")
+
             else:
                 outofrange += [index[i]]  # jesli ne nasiol tam tikera, to dabavliu
     print(f'Vremia pereriva {time.ctime()}', 'OUTOFRANGE', outofrange, type(outofrange))
